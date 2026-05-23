@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Carrito | [[${businessName}]]</title>
+    <link rel="stylesheet" th:href="@{/css/styles.css}">
+</head>
+<body>
+<header class="site-header">
+    <nav class="nav container">
+        <a class="brand" th:href="@{/}" th:text="${businessName}">FlexCommerce Java</a>
+        <div class="nav-links">
+            <a th:href="@{/productos}">Productos</a>
+            <a th:href="@{/reservas}">Reservar cita</a>
+            <a th:href="@{/carrito}" class="active">Carrito <span class="pill" th:text="${cart.totalItems}">0</span></a>
+            <a th:if="${loggedIn}" th:href="@{/mi-cuenta}">Mi cuenta</a>
+            <a th:unless="${loggedIn}" th:href="@{/login}">Entrar</a>
+            <a th:if="${adminUser}" th:href="@{/admin}">Admin</a>
+        </div>
+    </nav>
+</header>
+
+<main class="container page">
+    <div class="section-heading">
+        <span class="eyebrow">Compra</span>
+        <h1>Carrito de compras</h1>
+        <p>Carrito gestionado en servidor con Java y sesión HTTP.</p>
+    </div>
+
+    <div class="alert success" th:if="${success}" th:text="${success}">Correcto</div>
+    <div class="alert error" th:if="${error}" th:text="${error}">Error</div>
+
+    <div class="empty-state" th:if="${cart.empty}">
+        <h2>Tu carrito está vacío</h2>
+        <p>Añade productos o servicios desde el catálogo.</p>
+        <a class="btn btn-primary" th:href="@{/productos}">Ir a productos</a>
+    </div>
+
+    <div class="cart-layout" th:unless="${cart.empty}">
+        <div class="table-card">
+            <table>
+                <thead>
+                <tr>
+                    <th>Producto</th>
+                    <th>Precio</th>
+                    <th>Cantidad</th>
+                    <th>Subtotal</th>
+                    <th></th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="line : ${cart.lines}">
+                    <td th:text="${line.productName}">Producto</td>
+                    <td><span th:text="${line.unitPrice}">0.00</span> €</td>
+                    <td>
+                        <form class="inline-form" th:action="@{/carrito/update/{id}(id=${line.productId})}" method="post">
+                            <input class="qty" type="number" name="quantity" min="0" th:value="${line.quantity}">
+                            <button class="btn btn-tiny" type="submit">Actualizar</button>
+                        </form>
+                    </td>
+                    <td><strong><span th:text="${line.subtotal}">0.00</span> €</strong></td>
+                    <td>
+                        <form th:action="@{/carrito/remove/{id}(id=${line.productId})}" method="post">
+                            <button class="btn btn-danger btn-tiny" type="submit">Quitar</button>
+                        </form>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <aside class="summary-card">
+            <h2>Resumen</h2>
+            <div class="summary-row">
+                <span>Artículos</span>
+                <strong th:text="${cart.totalItems}">0</strong>
+            </div>
+            <div class="summary-row total">
+                <span>Total</span>
+                <strong><span th:text="${cart.total}">0.00</span> €</strong>
+            </div>
+            <a class="btn btn-primary full" th:href="@{/checkout}">Finalizar compra / invitado</a>
+            <a class="btn btn-outline full" th:href="@{/productos}">Seguir comprando</a>
+            <form th:action="@{/carrito/clear}" method="post">
+                <button class="btn btn-outline full" type="submit">Vaciar carrito</button>
+            </form>
+        </aside>
+    </div>
+</main>
+
+<footer class="footer">
+    <div class="container footer-content">
+        <span th:text="${businessName}">FlexCommerce Java</span>
+        <span>Tel: <strong th:text="${businessPhone}">678 239 521</strong></span>
+        <span>Email: <strong th:text="${businessEmail}">email</strong></span>
+    </div>
+</footer>
+</body>
+</html>

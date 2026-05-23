@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reservas | [[${businessName}]]</title>
+    <link rel="stylesheet" th:href="@{/css/styles.css}">
+</head>
+<body>
+<header class="site-header">
+    <nav class="nav container">
+        <a class="brand" th:href="@{/}" th:text="${businessName}">FlexCommerce Java</a>
+        <div class="nav-links">
+            <a th:href="@{/productos}">Productos</a>
+            <a th:href="@{/reservas}" class="active">Reservar cita</a>
+            <a th:href="@{/carrito}">Carrito <span class="pill" th:text="${cart.totalItems}">0</span></a>
+            <a th:if="${loggedIn}" th:href="@{/mi-cuenta}">Mi cuenta</a>
+            <a th:unless="${loggedIn}" th:href="@{/login}">Entrar</a>
+            <a th:if="${adminUser}" th:href="@{/admin}">Admin</a>
+        </div>
+    </nav>
+</header>
+
+<main class="container page booking-layout wide-booking">
+    <section>
+        <div class="section-heading left">
+            <span class="eyebrow">Citas</span>
+            <h1>Reserva una cita</h1>
+            <p>Selecciona el día en el calendario anual. Los días con citas ya reservadas muestran las horas ocupadas para evitar solapamientos.</p>
+        </div>
+
+        <div class="alert error" th:if="${error}" th:text="${error}">Error</div>
+
+        <form id="bookingForm" class="form-card" th:action="@{/reservas}" th:object="${appointment}" method="post">
+            <label>Nombre completo
+                <input type="text" th:field="*{customerName}" required placeholder="Nombre y apellidos">
+                <span class="field-error" th:if="${#fields.hasErrors('customerName')}" th:errors="*{customerName}">Error</span>
+            </label>
+
+            <div class="form-grid">
+                <label>Email
+                    <input type="email" th:field="*{email}" required placeholder="cliente@email.com">
+                    <span class="field-error" th:if="${#fields.hasErrors('email')}" th:errors="*{email}">Error</span>
+                </label>
+                <label>Teléfono
+                    <input type="tel" th:field="*{phone}" required placeholder="600 000 000">
+                    <span class="field-error" th:if="${#fields.hasErrors('phone')}" th:errors="*{phone}">Error</span>
+                </label>
+            </div>
+
+            <label>Tipo de servicio
+                <select th:field="*{serviceType}" required>
+                    <option value="">Selecciona un servicio</option>
+                    <option th:each="service : ${services}" th:value="${service}" th:text="${service}">Servicio</option>
+                </select>
+                <span class="field-error" th:if="${#fields.hasErrors('serviceType')}" th:errors="*{serviceType}">Error</span>
+            </label>
+
+            <section class="calendar-section">
+                <div class="calendar-topbar">
+                    <div>
+                        <span class="eyebrow">Calendario anual</span>
+                        <h2>Selecciona día, mes y año</h2>
+                    </div>
+                    <div class="year-switcher">
+                        <a class="btn btn-outline" th:href="@{/reservas(year=${previousYear})}">← [[${previousYear}]]</a>
+                        <strong th:text="${calendarYear}">2026</strong>
+                        <a class="btn btn-outline" th:href="@{/reservas(year=${nextYear})}">[[${nextYear}]] →</a>
+                    </div>
+                </div>
+
+                <div class="calendar-legend">
+                    <span><i class="legend-dot available"></i>Disponible</span>
+                    <span><i class="legend-dot busy"></i>Con citas reservadas</span>
+                    <span><i class="legend-dot full"></i>Día completo</span>
+                </div>
+
+                <div class="selected-booking-box">
+                    <span>Día seleccionado: <strong id="selectedDateText">Sin seleccionar</strong></span>
+                    <span>Hora seleccionada: <strong id="selectedTimeText">Sin seleccionar</strong></span>
+                </div>
+
+                <div id="reservedDayPanel" class="reserved-day-panel hidden">
+                    <div>
+                        <span class="eyebrow">Agenda del día</span>
+                        <h3>Citas ya reservadas</h3>
+                    </div>
+                    <ul id="reservedDayList"></ul>
+                    <p id="reservedDayEmpty" class="muted">Este día no tiene citas reservadas todavía.</p>
+                </div>
+
+                <input id="appointmentDate" type="hidden" th:field="*{appointmentDate}">
+                <input id="appointmentTime" type="hidden" th:field="*{appointmentTime}">
+                <span class="field-error" th:if="${#fields.hasErrors('appointmentDate')}" th:errors="*{appointmentDate}">Error fecha</span>
+                <span class="field-error" th:if="${#fields.hasErrors('appointmentTime')}" th:errors="*{appointmentTime}">Error hora</span>
+
+                <div class="year-calendar">
+                    <article class="month-card" th:each="month : ${calendarMonths}">
+                        <h3 th:text="${month.name}">Enero</h3>
+                        <div class="weekdays">
+                            <span>L</span><span>M</span><span>X</span><span>J</span><span>V</span><span>S</span><span>D</span>
+                        </div>
+                        <div class="month-grid">
+                            <th:block th:each="day : ${month.days}">
+                                <span th:if="${!day.currentMonth}" class="calendar-empty"></span>
+                                <button th:if="${day.currentMonth}"
+                                        type="button"
+                                        th:class="${'day-button' + (day.today ? ' today' : '') + (day.hasAppointments ? ' busy reserved-day' : '') + (day.fullyBooked ? ' full' : '')}"
+                                        th:data-date="${day.dateIso}"
+                                        th:title="${day.tooltip}">
+                                    <span class="day-number" th:text="${day.dayOfMonth}">1</span>
+                                    <span th:if="${day.hasAppointments}" class="day-reserved-count" th:text="${day.reservedCount == 1 ? '1 cita' : day.reservedCount + ' citas'}">1 cita</span>
+                                    <span th:if="${day.hasAppointments}" class="day-reserved-times" th:text="${day.reservedPreviewText}">09:00</span>
+                                    <span th:if="${day.extraReservedText != ''}" class="day-reserved-extra" th:text="${day.extraReservedText}">+1 más</span>
+                                    <span th:if="${day.fullyBooked}" class="day-full-label">Completo</span>
+                                </button>
+                            </th:block>
+                        </div>
+                    </article>
+                </div>
+            </section>
+
+            <section class="time-section">
+                <div class="calendar-topbar compact">
+                    <div>
+                        <span class="eyebrow">Horario</span>
+                        <h2>Selecciona una hora</h2>
+                    </div>
+                    <p class="muted">Las horas ocupadas se desactivan automáticamente al elegir un día.</p>
+                </div>
+                <div class="time-grid">
+                    <button th:each="slot : ${availableTimes}"
+                            type="button"
+                            class="time-slot"
+                            th:data-time="${slot.value}"
+                            th:text="${slot.label}">09:00</button>
+                </div>
+            </section>
+
+            <label>Comentarios
+                <textarea th:field="*{comments}" rows="4" placeholder="Explica qué necesitas, ubicación, urgencia o detalles del servicio"></textarea>
+            </label>
+
+            <button class="btn btn-primary full" type="submit">Confirmar reserva</button>
+        </form>
+    </section>
+
+    <aside class="info-panel">
+        <h2>Modelo adaptable</h2>
+        <p>Este sistema de reserva sirve para:</p>
+        <ul class="check-list dark">
+            <li>Peluquerías y estética</li>
+            <li>Servicios técnicos</li>
+            <li>Clases particulares</li>
+            <li>Consultorías</li>
+            <li>Clínicas y centros privados</li>
+            <li>Talleres y comercios locales</li>
+        </ul>
+        <p class="muted">El calendario muestra las citas ya reservadas. Al seleccionar un día, las horas ocupadas aparecen bloqueadas y no se pueden reservar de nuevo.</p>
+    </aside>
+</main>
+
+<footer class="footer">
+    <div class="container footer-content">
+        <span th:text="${businessName}">FlexCommerce Java</span>
+        <span>Tel: <strong th:text="${businessPhone}">678 239 521</strong></span>
+        <span>Email: <strong th:text="${businessEmail}">email</strong></span>
+    </div>
+</footer>
+
+<script th:inline="javascript">
+    const selectedDateInput = document.getElementById('appointmentDate');
+    const selectedTimeInput = document.getElementById('appointmentTime');
+    const selectedDateText = document.getElementById('selectedDateText');
+    const selectedTimeText = document.getElementById('selectedTimeText');
+    const reservedDayPanel = document.getElementById('reservedDayPanel');
+    const reservedDayList = document.getElementById('reservedDayList');
+    const reservedDayEmpty = document.getElementById('reservedDayEmpty');
+    const reservedSlots = /*[[${reservedSlots}]]*/ {};
+    const reservedSlotDetails = /*[[${reservedSlotDetails}]]*/ {};
+    const initialDate = /*[[${selectedDate}]]*/ "";
+    const initialTime = /*[[${selectedTime}]]*/ "";
+
+    function formatDate(dateIso) {
+        if (!dateIso) return 'Sin seleccionar';
+        const parts = dateIso.split('-');
+        return `${parts[2]}/${parts[1]}/${parts[0]}`;
+    }
+
+    function clearTimeSelection() {
+        selectedTimeInput.value = '';
+        selectedTimeText.textContent = 'Sin seleccionar';
+        document.querySelectorAll('.time-slot').forEach(button => button.classList.remove('selected'));
+    }
+
+    function showReservedAppointments(dateIso) {
+        const details = reservedSlotDetails[dateIso] || [];
+        reservedDayPanel.classList.remove('hidden');
+        reservedDayList.innerHTML = '';
+
+        if (details.length === 0) {
+            reservedDayEmpty.style.display = 'block';
+            return;
+        }
+
+        reservedDayEmpty.style.display = 'none';
+        details.forEach(item => {
+            const li = document.createElement('li');
+            li.innerHTML = `<strong>${item.time}</strong> <span>${item.service || 'Cita reservada'}</span> <em>${item.status || 'RESERVADA'}</em>`;
+            reservedDayList.appendChild(li);
+        });
+    }
+
+    function refreshDisabledTimes(dateIso) {
+        const reservedForDate = reservedSlots[dateIso] || [];
+        document.querySelectorAll('.time-slot').forEach(button => {
+            const isReserved = reservedForDate.includes(button.dataset.time);
+            button.disabled = isReserved;
+            button.classList.toggle('reserved', isReserved);
+            button.title = isReserved ? 'Hora ya reservada' : 'Hora disponible';
+            if (isReserved && selectedTimeInput.value === button.dataset.time) {
+                clearTimeSelection();
+            }
+        });
+    }
+
+    function selectDate(dateIso, keepTime = false) {
+        selectedDateInput.value = dateIso;
+        selectedDateText.textContent = formatDate(dateIso);
+        document.querySelectorAll('.day-button').forEach(button => {
+            button.classList.toggle('selected', button.dataset.date === dateIso);
+        });
+        showReservedAppointments(dateIso);
+        refreshDisabledTimes(dateIso);
+        if (!keepTime) {
+            clearTimeSelection();
+        }
+    }
+
+    function selectTime(timeValue) {
+        selectedTimeInput.value = timeValue;
+        selectedTimeText.textContent = timeValue;
+        document.querySelectorAll('.time-slot').forEach(button => {
+            button.classList.toggle('selected', button.dataset.time === timeValue);
+        });
+    }
+
+    document.querySelectorAll('.day-button').forEach(button => {
+        button.addEventListener('click', () => selectDate(button.dataset.date));
+    });
+
+    document.querySelectorAll('.time-slot').forEach(button => {
+        button.addEventListener('click', () => {
+            if (!selectedDateInput.value) {
+                alert('Primero selecciona un día del calendario.');
+                return;
+            }
+            if (!button.disabled) {
+                selectTime(button.dataset.time);
+            }
+        });
+    });
+
+    document.getElementById('bookingForm').addEventListener('submit', event => {
+        if (!selectedDateInput.value || !selectedTimeInput.value) {
+            event.preventDefault();
+            alert('Selecciona un día y una hora antes de confirmar la reserva.');
+        }
+    });
+
+    if (initialDate) {
+        selectDate(initialDate, true);
+    }
+    if (initialTime) {
+        selectTime(initialTime);
+    }
+</script>
+</body>
+</html>

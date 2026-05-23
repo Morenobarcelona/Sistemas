@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Productos | FlexCommerce</title>
+    <link rel="stylesheet" th:href="@{/css/styles.css}">
+</head>
+<body>
+<header class="site-header">
+    <nav class="nav container">
+        <a class="brand" th:href="@{/}" th:text="${businessName}">FlexCommerce Java</a>
+        <div class="nav-links">
+            <a th:href="@{/productos}">Productos</a>
+            <a th:href="@{/reservas}">Reservar cita</a>
+            <a th:href="@{/carrito}">Carrito <span class="pill" th:text="${cart.totalItems}">0</span></a>
+            <a th:if="${loggedIn}" th:href="@{/mi-cuenta}">Mi cuenta</a>
+            <a th:unless="${loggedIn}" th:href="@{/login}">Entrar</a>
+            <a th:if="${adminUser}" th:href="@{/admin}">Admin</a>
+        </div>
+    </nav>
+</header>
+
+<main class="container section">
+    <div class="section-heading">
+        <span class="eyebrow">Tienda online</span>
+        <h1>Productos y servicios</h1>
+        <p>Cuando añades un producto, puedes seguir comprando y volver al carrito cuando quieras.</p>
+    </div>
+
+    <div th:if="${success}" class="alert success" th:text="${success}">Producto añadido</div>
+    <div th:if="${error}" class="alert error" th:text="${error}">Error</div>
+
+    <div class="toolbar">
+        <a class="btn btn-outline" th:href="@{/carrito}">Ver carrito (<span th:text="${cart.totalItems}">0</span>)</a>
+        <a class="btn btn-outline" th:href="@{/reservas}">Reservar cita</a>
+    </div>
+
+    <div class="product-grid">
+        <article class="product-card" th:each="product : ${products}">
+            <div class="product-image">
+                <img th:src="${product.imageUrl}" alt="Imagen producto">
+            </div>
+            <span class="category" th:text="${product.category}">Categoría</span>
+            <h3 th:text="${product.name}">Producto</h3>
+            <p th:text="${product.description}">Descripción</p>
+            <p class="muted">SKU: <span th:text="${product.sku ?: 'Sin SKU'}">SKU</span></p>
+            <p class="muted">Stock disponible: <strong th:text="${product.stock}">0</strong></p>
+            <div class="card-footer">
+                <div>
+                    <strong><span th:text="${product.price}">49.90</span> €</strong>
+                    <small>IVA incluido</small>
+                </div>
+                <form th:action="@{/carrito/add/{id}(id=${product.id})}" method="post" th:if="${product.available}" class="inline-form">
+                    <input class="qty-input" type="number" name="quantity" min="1" th:max="${product.stock}" value="1">
+                    <input type="hidden" name="returnTo" value="/productos">
+                    <button class="btn btn-small" type="submit">Añadir y seguir comprando</button>
+                </form>
+                <span class="badge danger" th:unless="${product.available}">No disponible</span>
+            </div>
+        </article>
+    </div>
+</main>
+
+<footer class="footer">
+    <div class="container footer-content">
+        <span th:text="${businessName}">FlexCommerce Java</span>
+        <span>Tel: <strong th:text="${businessPhone}">678 239 521</strong></span>
+        <span>Email: <strong th:text="${businessEmail}">email</strong></span>
+    </div>
+</footer>
+</body>
+</html>

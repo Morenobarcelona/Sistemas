@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin | FlexCommerce</title>
+    <link rel="stylesheet" th:href="@{/css/styles.css}">
+</head>
+<body>
+<header class="site-header admin-header">
+    <nav class="nav container">
+        <a class="brand" th:href="@{/admin}">Panel Admin</a>
+        <div class="nav-links">
+            <a th:href="@{/}">Web</a>
+            <a th:href="@{/admin/productos}">Productos</a>
+            <a th:href="@{/admin/reservas}">Reservas</a>
+            <a th:href="@{/admin/pedidos}">Pedidos</a>
+            <form th:action="@{/logout}" method="post" class="logout-form"><button type="submit">Salir</button></form>
+        </div>
+    </nav>
+</header>
+
+<main class="container section">
+    <div class="section-heading">
+        <span class="eyebrow">Administración</span>
+        <h1>Dashboard general</h1>
+        <p>Resumen de tienda, reservas, pedidos y avisos de stock.</p>
+    </div>
+
+    <div th:if="${success}" class="alert success" th:text="${success}">OK</div>
+    <div th:if="${error}" class="alert error" th:text="${error}">Error</div>
+
+    <div class="stat-grid">
+        <div class="stat-card"><span>Productos</span><strong th:text="${productCount}">0</strong></div>
+        <div class="stat-card"><span>Reservas</span><strong th:text="${appointmentCount}">0</strong></div>
+        <div class="stat-card"><span>Pedidos</span><strong th:text="${orderCount}">0</strong></div>
+    </div>
+
+    <div class="admin-grid">
+        <section class="panel">
+            <h2>Próximas reservas</h2>
+            <table class="table">
+                <thead><tr><th>Fecha</th><th>Hora</th><th>Cliente</th><th>Estado</th></tr></thead>
+                <tbody>
+                <tr th:each="a : ${latestAppointments}">
+                    <td th:text="${a.appointmentDate}">2026-01-01</td>
+                    <td th:text="${a.appointmentTime}">10:00</td>
+                    <td th:text="${a.customerName}">Cliente</td>
+                    <td><span class="badge" th:text="${a.status}">PENDIENTE</span></td>
+                </tr>
+                <tr th:if="${#lists.isEmpty(latestAppointments)}"><td colspan="4">No hay reservas.</td></tr>
+                </tbody>
+            </table>
+            <a class="btn btn-outline" th:href="@{/admin/reservas}">Gestionar reservas</a>
+        </section>
+
+        <section class="panel">
+            <h2>Últimos pedidos</h2>
+            <table class="table">
+                <thead><tr><th>ID</th><th>Cliente</th><th>Total</th><th>Estado</th></tr></thead>
+                <tbody>
+                <tr th:each="o : ${latestOrders}">
+                    <td th:text="${o.id}">1</td>
+                    <td th:text="${o.customerName}">Cliente</td>
+                    <td><span th:text="${o.total}">0.00</span> €</td>
+                    <td><span class="badge" th:text="${o.status}">RECIBIDO</span></td>
+                </tr>
+                <tr th:if="${#lists.isEmpty(latestOrders)}"><td colspan="4">No hay pedidos.</td></tr>
+                </tbody>
+            </table>
+            <a class="btn btn-outline" th:href="@{/admin/pedidos}">Gestionar pedidos</a>
+        </section>
+    </div>
+
+    <section class="panel">
+        <h2>Productos con poco stock</h2>
+        <table class="table">
+            <thead><tr><th>Producto</th><th>Categoría</th><th>Stock</th><th>Acción</th></tr></thead>
+            <tbody>
+            <tr th:each="p : ${lowStockProducts}">
+                <td th:text="${p.name}">Producto</td>
+                <td th:text="${p.category}">Categoría</td>
+                <td th:text="${p.stock}">0</td>
+                <td><a th:href="@{/admin/productos/{id}/editar(id=${p.id})}">Editar</a></td>
+            </tr>
+            <tr th:if="${#lists.isEmpty(lowStockProducts)}"><td colspan="4">No hay productos con poco stock.</td></tr>
+            </tbody>
+        </table>
+    </section>
+</main>
+</body>
+</html>

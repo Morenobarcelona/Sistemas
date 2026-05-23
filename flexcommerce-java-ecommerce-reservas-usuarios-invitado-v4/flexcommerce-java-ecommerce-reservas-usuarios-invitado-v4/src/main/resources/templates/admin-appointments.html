@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin reservas | FlexCommerce</title>
+    <link rel="stylesheet" th:href="@{/css/styles.css}">
+</head>
+<body>
+<header class="site-header admin-header">
+    <nav class="nav container">
+        <a class="brand" th:href="@{/admin}">Panel Admin</a>
+        <div class="nav-links">
+            <a th:href="@{/admin}">Dashboard</a>
+            <a th:href="@{/admin/productos}">Productos</a>
+            <a th:href="@{/admin/pedidos}">Pedidos</a>
+            <form th:action="@{/logout}" method="post" class="logout-form"><button type="submit">Salir</button></form>
+        </div>
+    </nav>
+</header>
+
+<main class="container section">
+    <div class="section-heading">
+        <span class="eyebrow">Agenda</span>
+        <h1>Gestión de reservas</h1>
+        <p>Cambia el estado de una cita sin eliminar el histórico. Las canceladas liberan hueco.</p>
+    </div>
+
+    <div th:if="${success}" class="alert success" th:text="${success}">OK</div>
+    <div th:if="${error}" class="alert error" th:text="${error}">Error</div>
+
+    <section class="panel">
+        <table class="table">
+            <thead>
+            <tr><th>Fecha</th><th>Hora</th><th>Servicio</th><th>Cliente</th><th>Contacto</th><th>Estado</th><th>Actualizar</th></tr>
+            </thead>
+            <tbody>
+            <tr th:each="a : ${appointments}">
+                <td th:text="${a.appointmentDate}">2026-01-01</td>
+                <td th:text="${a.appointmentTime}">10:00</td>
+                <td th:text="${a.serviceType}">Servicio</td>
+                <td><strong th:text="${a.customerName}">Cliente</strong><br><small th:text="${a.comments}">Comentario</small></td>
+                <td><span th:text="${a.phone}">Tel</span><br><small th:text="${a.email}">Email</small></td>
+                <td><span class="badge" th:text="${a.status}">PENDIENTE</span></td>
+                <td>
+                    <form th:action="@{/admin/reservas/{id}/estado(id=${a.id})}" method="post" class="inline-form">
+                        <select name="status">
+                            <option th:each="s : ${statuses}" th:value="${s}" th:text="${s}" th:selected="${s == a.status}">PENDIENTE</option>
+                        </select>
+                        <button class="btn btn-small" type="submit">Guardar</button>
+                    </form>
+                </td>
+            </tr>
+            <tr th:if="${#lists.isEmpty(appointments)}"><td colspan="7">No hay reservas.</td></tr>
+            </tbody>
+        </table>
+    </section>
+</main>
+</body>
+</html>

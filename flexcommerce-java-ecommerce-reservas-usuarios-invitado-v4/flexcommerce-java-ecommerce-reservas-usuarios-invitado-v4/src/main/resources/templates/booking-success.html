@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reserva confirmada | [[${businessName}]]</title>
+    <link rel="stylesheet" th:href="@{/css/styles.css}">
+</head>
+<body>
+<header class="site-header">
+    <nav class="nav container">
+        <a class="brand" th:href="@{/}" th:text="${businessName}">FlexCommerce Java</a>
+        <div class="nav-links">
+            <a th:href="@{/productos}">Productos</a>
+            <a th:href="@{/reservas}">Reservar cita</a>
+            <a th:href="@{/admin}">Admin</a>
+        </div>
+    </nav>
+</header>
+
+<main class="container page narrow">
+    <div class="success-card">
+        <span class="success-icon">✓</span>
+        <h1>Reserva registrada</h1>
+        <p>Hemos recibido la solicitud de cita.</p>
+        <div class="detail-box">
+            <p><strong>Cliente:</strong> <span th:text="${appointment.customerName}">Cliente</span></p>
+            <p><strong>Servicio:</strong> <span th:text="${appointment.serviceType}">Servicio</span></p>
+            <p><strong>Fecha:</strong> <span th:text="${appointment.appointmentDate}">Fecha</span></p>
+            <p><strong>Hora:</strong> <span th:text="${appointment.appointmentTime}">Hora</span></p>
+            <p><strong>Estado:</strong> <span th:text="${appointment.status}">PENDIENTE</span></p>
+        </div>
+        <div class="hero-actions centered">
+            <a class="btn btn-primary" th:href="@{/}">Volver al inicio</a>
+            <a class="btn btn-outline" th:href="@{/admin}">Ver en admin</a>
+        </div>
+    </div>
+</main>
+</body>
+</html>

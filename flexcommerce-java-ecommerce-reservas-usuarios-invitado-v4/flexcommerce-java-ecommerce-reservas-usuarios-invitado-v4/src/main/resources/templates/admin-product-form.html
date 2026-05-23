@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${title} + ' | FlexCommerce'">Producto</title>
+    <link rel="stylesheet" th:href="@{/css/styles.css}">
+</head>
+<body>
+<header class="site-header admin-header">
+    <nav class="nav container">
+        <a class="brand" th:href="@{/admin}">Panel Admin</a>
+        <div class="nav-links">
+            <a th:href="@{/admin/productos}">Volver a productos</a>
+            <form th:action="@{/logout}" method="post" class="logout-form"><button type="submit">Salir</button></form>
+        </div>
+    </nav>
+</header>
+
+<main class="container section narrow-wide">
+    <div class="section-heading">
+        <span class="eyebrow">Producto</span>
+        <h1 th:text="${title}">Editar producto</h1>
+    </div>
+
+    <section class="panel">
+        <form th:action="${formAction}" th:object="${product}" method="post" class="form-grid">
+            <label>Nombre
+                <input type="text" th:field="*{name}" required>
+                <small class="field-error" th:if="${#fields.hasErrors('name')}" th:errors="*{name}">Error</small>
+            </label>
+            <label>Categoría
+                <input type="text" th:field="*{category}" required>
+                <small class="field-error" th:if="${#fields.hasErrors('category')}" th:errors="*{category}">Error</small>
+            </label>
+            <label>SKU
+                <input type="text" th:field="*{sku}" placeholder="PROD-001">
+            </label>
+            <label>Precio con IVA
+                <input type="number" step="0.01" min="0" th:field="*{price}" required>
+                <small class="field-error" th:if="${#fields.hasErrors('price')}" th:errors="*{price}">Error</small>
+            </label>
+            <label>IVA %
+                <input type="number" step="0.01" min="0" th:field="*{ivaPercent}" required>
+            </label>
+            <label>Stock
+                <input type="number" min="0" th:field="*{stock}" required>
+            </label>
+            <label class="full">URL imagen
+                <input type="text" th:field="*{imageUrl}" placeholder="/css/img-placeholder.svg">
+            </label>
+            <label class="full">Descripción
+                <textarea th:field="*{description}" rows="5"></textarea>
+            </label>
+            <label class="checkbox-line full">
+                <input type="hidden" name="active" value="false">
+                <input type="checkbox" name="active" value="true" th:checked="*{active}">
+                Producto activo y visible en tienda
+            </label>
+            <div class="form-actions full">
+                <button class="btn btn-primary" type="submit">Guardar producto</button>
+                <a class="btn btn-outline" th:href="@{/admin/productos}">Cancelar</a>
+            </div>
+        </form>
+    </section>
+</main>
+</body>
+</html>

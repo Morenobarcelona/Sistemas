@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checkout | [[${businessName}]]</title>
+    <link rel="stylesheet" th:href="@{/css/styles.css}">
+</head>
+<body>
+<header class="site-header">
+    <nav class="nav container">
+        <a class="brand" th:href="@{/}" th:text="${businessName}">FlexCommerce Java</a>
+        <div class="nav-links">
+            <a th:href="@{/productos}">Productos</a>
+            <a th:href="@{/reservas}">Reservar cita</a>
+            <a th:href="@{/carrito}">Carrito <span class="pill" th:text="${cart.totalItems}">0</span></a>
+            <a th:if="${loggedIn}" th:href="@{/mi-cuenta}">Mi cuenta</a>
+            <a th:unless="${loggedIn}" th:href="@{/login}">Entrar</a>
+            <a th:if="${adminUser}" th:href="@{/admin}">Admin</a>
+        </div>
+    </nav>
+</header>
+
+<main class="container page narrow">
+    <div class="section-heading">
+        <span class="eyebrow">Pedido</span>
+        <h1>Finalizar compra</h1>
+        <p>Puedes comprar como invitado sin registrarte o iniciar sesión para guardar el pedido en tu cuenta.</p>
+    </div>
+
+    <div class="choice-grid" th:unless="${loggedIn}">
+        <div class="choice-card featured">
+            <h2>Compra como invitado</h2>
+            <p>No necesitas crear cuenta. Tu carrito pertenece solo a tu sesión del navegador, por lo que varios clientes anónimos pueden comprar a la vez sin mezclarse.</p>
+            <span class="badge">Recomendado para compra rápida</span>
+        </div>
+        <div class="choice-card">
+            <h2>¿Quieres cuenta?</h2>
+            <p>Si te registras podrás entrar después en <strong>Mi cuenta</strong> y ver tus pedidos.</p>
+            <div class="hero-actions compact">
+                <a class="btn btn-outline" th:href="@{/login}">Iniciar sesión</a>
+                <a class="btn btn-outline" th:href="@{/registro}">Crear cuenta</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="alert success" th:if="${loggedIn}">
+        Estás comprando con la cuenta <strong th:text="${currentUsername}">cliente@email.com</strong>. También puedes cerrar sesión y comprar como invitado.
+    </div>
+
+    <form class="form-card" th:action="@{/checkout}" method="post">
+        <input type="hidden" name="checkoutMode" th:value="${loggedIn} ? 'REGISTERED' : 'GUEST'">
+
+        <label>Nombre completo
+            <input type="text" name="customerName" required placeholder="Nombre del cliente"
+                   th:value="${checkoutUser != null ? checkoutUser.fullName : ''}">
+        </label>
+        <label>Email
+            <input type="email" name="email" required placeholder="cliente@email.com"
+                   th:value="${checkoutUser != null ? checkoutUser.email : ''}">
+        </label>
+        <label>Teléfono
+            <input type="tel" name="phone" required placeholder="600 000 000"
+                   th:value="${checkoutUser != null ? checkoutUser.phone : ''}">
+        </label>
+        <label>Dirección o comentarios de entrega
+            <textarea name="address" rows="4" placeholder="Dirección, observaciones o forma de entrega"></textarea>
+        </label>
+
+        <div class="summary-inline">
+            <span>Total del pedido</span>
+            <strong><span th:text="${cart.total}">0.00</span> €</strong>
+        </div>
+
+        <p class="muted tiny-text" th:unless="${loggedIn}">
+            Compra invitado · Sesión técnica: <span th:text="${sessionId}">sesion</span>. Este identificador separa tu carrito del carrito de otros clientes anónimos.
+        </p>
+
+        <button class="btn btn-primary full" type="submit">Confirmar pedido</button>
+        <a class="btn btn-outline full" th:href="@{/carrito}">Volver al carrito</a>
+    </form>
+</main>
+</body>
+</html>

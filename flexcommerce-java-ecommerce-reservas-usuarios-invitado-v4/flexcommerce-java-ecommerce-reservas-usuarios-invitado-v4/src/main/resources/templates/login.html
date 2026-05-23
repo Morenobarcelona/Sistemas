@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login | FlexCommerce</title>
+    <link rel="stylesheet" th:href="@{/css/styles.css}">
+</head>
+<body>
+<header class="site-header">
+    <nav class="nav container">
+        <a class="brand" th:href="@{/}" th:text="${businessName}">FlexCommerce Java</a>
+        <div class="nav-links">
+            <a th:href="@{/productos}">Productos</a>
+            <a th:href="@{/reservas}">Reservar cita</a>
+            <a th:href="@{/carrito}">Carrito <span class="pill" th:text="${cart.totalItems}">0</span></a>
+        </div>
+    </nav>
+</header>
+
+<main class="container section narrow">
+    <div class="panel">
+        <span class="eyebrow">Zona privada</span>
+        <h1>Acceso de cliente o administrador</h1>
+        <p class="muted">Admin demo: <strong>admin</strong> / <strong>admin123</strong></p>
+        <p class="muted">Cliente demo: <strong>cliente@demo.com</strong> / <strong>cliente123</strong></p>
+        <div th:if="${success}" class="alert success" th:text="${success}">Cuenta creada</div>
+        <div th:if="${param.error}" class="alert error">Usuario o contraseña incorrectos.</div>
+        <div th:if="${param.logout}" class="alert success">Sesión cerrada correctamente.</div>
+        <form th:action="@{/login}" method="post" class="form-grid single">
+            <label>Usuario o email
+                <input type="text" name="username" required autofocus>
+            </label>
+            <label>Contraseña
+                <input type="password" name="password" required>
+            </label>
+            <button class="btn btn-primary" type="submit">Entrar</button>
+        </form>
+        <div class="hero-actions centered">
+            <a class="btn btn-outline" th:href="@{/registro}">Crear cuenta de cliente</a>
+            <a class="btn btn-outline" th:href="@{/checkout}">Comprar como invitado</a>
+        </div>
+    </div>
+</main>
+</body>
+</html>

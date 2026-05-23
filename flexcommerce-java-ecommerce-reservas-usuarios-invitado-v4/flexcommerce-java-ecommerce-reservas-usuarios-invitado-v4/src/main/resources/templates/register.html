@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registro cliente | [[${businessName}]]</title>
+    <link rel="stylesheet" th:href="@{/css/styles.css}">
+</head>
+<body>
+<header class="site-header">
+    <nav class="nav container">
+        <a class="brand" th:href="@{/}" th:text="${businessName}">FlexCommerce Java</a>
+        <div class="nav-links">
+            <a th:href="@{/productos}">Productos</a>
+            <a th:href="@{/carrito}">Carrito <span class="pill" th:text="${cart.totalItems}">0</span></a>
+            <a th:href="@{/login}">Entrar</a>
+        </div>
+    </nav>
+</header>
+
+<main class="container page narrow">
+    <div class="section-heading">
+        <span class="eyebrow">Clientes</span>
+        <h1>Crear cuenta</h1>
+        <p>La cuenta es opcional. También puedes comprar como invitado sin registrarte.</p>
+    </div>
+
+    <div th:if="${error}" class="alert error" th:text="${error}">Error</div>
+
+    <form class="form-card" th:action="@{/registro}" method="post">
+        <label>Nombre completo
+            <input type="text" name="fullName" required placeholder="Tu nombre">
+        </label>
+        <label>Email
+            <input type="email" name="email" required placeholder="cliente@email.com">
+        </label>
+        <label>Teléfono
+            <input type="tel" name="phone" placeholder="600 000 000">
+        </label>
+        <label>Contraseña
+            <input type="password" name="password" required minlength="6">
+        </label>
+        <label>Repetir contraseña
+            <input type="password" name="confirmPassword" required minlength="6">
+        </label>
+        <button class="btn btn-primary full" type="submit">Crear cuenta</button>
+        <a class="btn btn-outline full" th:href="@{/checkout}">Seguir como invitado</a>
+    </form>
+</main>
+</body>
+</html>

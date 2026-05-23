@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mi cuenta | [[${businessName}]]</title>
+    <link rel="stylesheet" th:href="@{/css/styles.css}">
+</head>
+<body>
+<header class="site-header">
+    <nav class="nav container">
+        <a class="brand" th:href="@{/}" th:text="${businessName}">FlexCommerce Java</a>
+        <div class="nav-links">
+            <a th:href="@{/productos}">Productos</a>
+            <a th:href="@{/reservas}">Reservar cita</a>
+            <a th:href="@{/carrito}">Carrito <span class="pill" th:text="${cart.totalItems}">0</span></a>
+            <a th:if="${adminUser}" th:href="@{/admin}">Admin</a>
+            <form class="logout-form" th:action="@{/logout}" method="post">
+                <button type="submit">Salir</button>
+            </form>
+        </div>
+    </nav>
+</header>
+
+<main class="container page">
+    <div class="section-heading">
+        <span class="eyebrow">Cliente</span>
+        <h1>Mi cuenta</h1>
+        <p>Pedidos asociados a tu cuenta y pedidos invitados de esta sesión.</p>
+    </div>
+
+    <div class="panel" th:if="${accountUser != null}">
+        <h2 th:text="${accountUser.fullName}">Cliente</h2>
+        <p class="muted">Usuario: <strong th:text="${accountUser.username}">email</strong></p>
+        <p class="muted">Teléfono: <strong th:text="${accountUser.phone ?: 'No indicado'}">tel</strong></p>
+    </div>
+
+    <section class="section compact-section">
+        <h2>Pedidos con cuenta</h2>
+        <div class="table-card" th:if="${!registeredOrders.empty}">
+            <table>
+                <thead>
+                <tr><th>Nº</th><th>Fecha</th><th>Total</th><th>Estado</th></tr>
+                </thead>
+                <tbody>
+                <tr th:each="order : ${registeredOrders}">
+                    <td th:text="${order.id}">1</td>
+                    <td th:text="${#temporals.format(order.createdAt, 'dd/MM/yyyy HH:mm')}">fecha</td>
+                    <td><span th:text="${order.total}">0.00</span> €</td>
+                    <td><span class="badge" th:text="${order.status}">RECIBIDO</span></td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="empty-state small" th:if="${registeredOrders.empty}">
+            <p>Aún no tienes pedidos guardados con tu cuenta.</p>
+        </div>
+    </section>
+
+    <section class="section compact-section">
+        <h2>Pedidos invitados de esta sesión</h2>
+        <p class="muted">Esto permite ver los pedidos hechos sin registro desde este mismo navegador.</p>
+        <div class="table-card" th:if="${!guestOrders.empty}">
+            <table>
+                <thead>
+                <tr><th>Nº</th><th>Fecha</th><th>Total</th><th>Estado</th></tr>
+                </thead>
+                <tbody>
+                <tr th:each="order : ${guestOrders}">
+                    <td th:text="${order.id}">1</td>
+                    <td th:text="${#temporals.format(order.createdAt, 'dd/MM/yyyy HH:mm')}">fecha</td>
+                    <td><span th:text="${order.total}">0.00</span> €</td>
+                    <td><span class="badge" th:text="${order.status}">RECIBIDO</span></td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="empty-state small" th:if="${guestOrders.empty}">
+            <p>No hay pedidos invitados en esta sesión.</p>
+        </div>
+    </section>
+</main>
+</body>
+</html>

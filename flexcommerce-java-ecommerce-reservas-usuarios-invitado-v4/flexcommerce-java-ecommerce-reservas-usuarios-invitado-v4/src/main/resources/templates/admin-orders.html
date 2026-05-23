@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin pedidos | FlexCommerce</title>
+    <link rel="stylesheet" th:href="@{/css/styles.css}">
+</head>
+<body>
+<header class="site-header admin-header">
+    <nav class="nav container">
+        <a class="brand" th:href="@{/admin}">Panel Admin</a>
+        <div class="nav-links">
+            <a th:href="@{/admin}">Dashboard</a>
+            <a th:href="@{/admin/productos}">Productos</a>
+            <a th:href="@{/admin/reservas}">Reservas</a>
+            <form th:action="@{/logout}" method="post" class="logout-form"><button type="submit">Salir</button></form>
+        </div>
+    </nav>
+</header>
+
+<main class="container section">
+    <div class="section-heading">
+        <span class="eyebrow">Ventas</span>
+        <h1>Gestión de pedidos</h1>
+        <p>Pedidos creados desde checkout con líneas y total.</p>
+    </div>
+
+    <div th:if="${success}" class="alert success" th:text="${success}">OK</div>
+    <div th:if="${error}" class="alert error" th:text="${error}">Error</div>
+
+    <section class="panel order-list">
+        <article class="order-card" th:each="o : ${orders}">
+            <div class="order-head">
+                <div>
+                    <h2>Pedido #<span th:text="${o.id}">1</span></h2>
+                    <p><strong th:text="${o.customerName}">Cliente</strong> · <span th:text="${o.email}">email</span> · <span th:text="${o.phone}">tel</span></p>
+                    <p>Tipo: <span class="badge" th:text="${o.checkoutMode == 'REGISTERED' ? 'Cliente registrado' : 'Invitado'}">Invitado</span>
+                        <span class="muted" th:if="${o.accountUsername != null}"> · Cuenta: <strong th:text="${o.accountUsername}">cuenta</strong></span>
+                        <span class="muted" th:if="${o.guestSessionId != null}"> · Sesión invitado: <strong th:text="${#strings.substring(o.guestSessionId, 0, 8)}">sesion</strong></span>
+                    </p>
+                    <p class="muted" th:text="${o.address}">Dirección</p>
+                </div>
+                <div class="order-total"><span th:text="${o.total}">0.00</span> €</div>
+            </div>
+            <table class="table compact">
+                <thead><tr><th>Producto</th><th>Cantidad</th><th>Precio</th><th>Subtotal</th></tr></thead>
+                <tbody>
+                <tr th:each="line : ${o.lines}">
+                    <td th:text="${line.productName}">Producto</td>
+                    <td th:text="${line.quantity}">1</td>
+                    <td><span th:text="${line.unitPrice}">0.00</span> €</td>
+                    <td><span th:text="${line.subtotal}">0.00</span> €</td>
+                </tr>
+                </tbody>
+            </table>
+            <form th:action="@{/admin/pedidos/{id}/estado(id=${o.id})}" method="post" class="inline-form">
+                <label>Estado
+                    <select name="status">
+                        <option th:each="s : ${statuses}" th:value="${s}" th:text="${s}" th:selected="${s == o.status}">RECIBIDO</option>
+                    </select>
+                </label>
+                <button class="btn btn-small" type="submit">Actualizar</button>
+            </form>
+        </article>
+        <p th:if="${#lists.isEmpty(orders)}">No hay pedidos registrados.</p>
+    </section>
+</main>
+</body>
+</html>

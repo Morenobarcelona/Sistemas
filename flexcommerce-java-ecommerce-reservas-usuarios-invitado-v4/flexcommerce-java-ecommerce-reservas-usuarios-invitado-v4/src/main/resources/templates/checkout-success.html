@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pedido confirmado | [[${businessName}]]</title>
+    <link rel="stylesheet" th:href="@{/css/styles.css}">
+</head>
+<body>
+<header class="site-header">
+    <nav class="nav container">
+        <a class="brand" th:href="@{/}" th:text="${businessName}">FlexCommerce Java</a>
+        <div class="nav-links">
+            <a th:href="@{/productos}">Productos</a>
+            <a th:href="@{/reservas}">Reservar cita</a>
+            <a th:if="${loggedIn}" th:href="@{/mi-cuenta}">Mi cuenta</a>
+            <a th:if="${adminUser}" th:href="@{/admin}">Admin</a>
+        </div>
+    </nav>
+</header>
+
+<main class="container page narrow">
+    <div class="success-card">
+        <span class="success-icon">✓</span>
+        <h1>Pedido registrado correctamente</h1>
+        <p>Pedido número <strong th:text="${order.id}">1</strong>.</p>
+        <p>Total: <strong><span th:text="${order.total}">0.00</span> €</strong></p>
+        <p>Estado inicial: <strong th:text="${order.status}">RECIBIDO</strong></p>
+        <p>Tipo de compra: <strong th:text="${order.checkoutMode == 'REGISTERED' ? 'Con cuenta de cliente' : 'Como invitado'}">Invitado</strong></p>
+        <p class="muted" th:if="${order.checkoutMode == 'GUEST'}">El pedido se ha creado sin registro. Otro cliente invitado puede comprar al mismo tiempo con su propia sesión independiente.</p>
+        <div class="hero-actions centered">
+            <a class="btn btn-primary" th:href="@{/productos}">Seguir comprando</a>
+            <a class="btn btn-outline" th:if="${loggedIn}" th:href="@{/mi-cuenta}">Ver mi cuenta</a>
+            <a class="btn btn-outline" th:unless="${loggedIn}" th:href="@{/registro}">Crear cuenta</a>
+            <a class="btn btn-outline" th:if="${adminUser}" th:href="@{/admin}">Ver en admin</a>
+        </div>
+    </div>
+</main>
+</body>
+</html>
